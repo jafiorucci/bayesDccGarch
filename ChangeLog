@@ -1,0 +1,35 @@
+Version 2.3 (07 Jul 2021)
+  * Included S3 functions: update() and predict()
+  * Improved inicialization of H;
+  * Changed default inicialization of parameters omega, alpha and beta;
+
+Version 2.2 (01 Apr 2021)
+  * fixed an error handling problem. Tests of type "class(try(.))=="try-error" " have been changed to ""try-error" %in% class(try(.))"
+  * updated link to bug report
+  * updated author name and email
+  * updated Rd files
+
+Version 2.1 (25 Nov 2020)
+  * Improved inicialization of matrix Q;
+  * Dynamic Condional Correlation results included;
+  * Predictions of DCC and DCCv included;
+  * Markov Chain of transformed parameters included;
+  * Lamda automatic estimated if algorithm 1 is called;
+  * Fixed an error in the standard skew t-Student distribution;
+
+Version 2.0 (29 Jan 2016)
+  * Included the 'bayesDccGarch' class;
+  * Included S3 functions: plot(), summary(), print() and window();
+
+Version 1.2 (29 Jul 2015)
+  * NAMESPACE updated;
+  * Examples updated;
+  * Fixed a bug with "Exception handling" in plotVol();
+
+Version 1.1 (29 May 2015)
+  * Fixed a bug in bayesDccGarch();
+  * New reference included;
+  * Fixed a bug with y-aixs in plotVol();
+  * Package Description updated;
+
+Version 1.0 (30 November 2014)
