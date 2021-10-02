@@ -5,7 +5,7 @@
 \alias{predict}
 \title{Bayesian forecast for volatilities and coditional correlations}
 \usage{
-\method{predict}{bayesDccGarch}(object, ..., n_ahead = 5)
+\method{predict}{bayesDccGarch}(object, ..., n_ahead = 5, bayes = T)
 }
 \arguments{
 \item{object}{a bayesDccGarch object}
@@ -13,6 +13,8 @@
 \item{...}{default argument of predict function, not used}
 
 \item{n_ahead}{number of steps ahead forecast}
+
+\item{bayes}{a boolean. If True, then the forecast is calculated as being the average of the forecasts across all states in the Markov chain (much slower). If False then predictions are calculated using estimation parameters (much faster).}
 }
 \value{
 A list with elements \code{H} and \code{R}

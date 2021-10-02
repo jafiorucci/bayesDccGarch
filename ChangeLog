@@ -1,4 +1,4 @@
-Version 2.3 (07 Jul 2021)
+Version 3.0 (01 Oct 2021)
   * Included S3 functions: update() and predict()
   * Improved inicialization of H;
   * Changed default inicialization of parameters omega, alpha and beta;

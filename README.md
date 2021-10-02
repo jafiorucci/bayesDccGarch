@@ -1,7 +1,7 @@
 # bayesDccGARCH R package: Methods and tools for Bayesian analysis of DCC-GARCH(1,1) Model.
 
 ## Description
-In this a R package we implemented functions for Bayesian analysis of DCC-GARCH(1,1) Model 
+In this R package we implemented functions for Bayesian analysis of DCC-GARCH(1,1) Model 
 using the same modelling of Fioruci et al (2014a). Several probabilities distributions are available for the errors which can model both skewness and heavy tails. 
 See Fioruci et al (2014b) for more details about the package.
 

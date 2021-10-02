@@ -591,12 +591,13 @@ update.bayesDccGarch <- function(object,..., mY_new){
 
 
 
-## included in version 2.3
+## included in version 3.0
 #' Bayesian forecast for volatilities and coditional correlations
 #' @aliases predict
 #' @param object a bayesDccGarch object
 #' @param ... default argument of predict function, not used
 #' @param n_ahead number of steps ahead forecast
+#' @param bayes a boolean. If True, then the forecast is calculated as being the average of the forecasts across all states in the Markov chain (much slower). If False then predictions are calculated using estimation parameters (much faster).
 #' @return A list with elements \code{H} and \code{R}
 #' @references
 #' Engle, R.F. and Sheppard, K. Theoretical and empirical properties of dynamic conditional correlation multivariate GARCH, 2001, NBER Working Paper.
@@ -605,54 +606,77 @@ update.bayesDccGarch <- function(object,..., mY_new){
 #' out = bayesDccGarch(DaxCacNik)
 #' predict.bayesDccGarch(out, n_ahead=5)
 #' }
-predict.bayesDccGarch <- function(object,..., n_ahead=5){
+predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=T){
   x = object
   if(class(x) != "bayesDccGarch"){ stop("Error: argument x is not a element of 'bayesDccGarch' class") }
   mY = x$control$data
   n = nrow(mY)
   k = ncol(mY)
 
-  if(k > 1){
-    omega = colMeans( x$MC[,3 + 4*(0:(k-1))] )
-    alpha = colMeans( x$MC[,4 + 4*(0:(k-1))] )
-    beta =  colMeans( x$MC[,5 + 4*(0:(k-1))] )
-    a = mean(x$MC[,'a'])
-    b = mean(x$MC[,'b'])
-  }else{
-    omega = mean( x$MC[,3] )
-    alpha = mean( x$MC[,4] )
-    beta =  mean( x$MC[,5] )
-    a = b = 0
-  }
-
   R = as.numeric( cor( x$control$data ) ) # unconditional correlation matrix
 
-  R_n1 = as.numeric(x$R_n1)
-  H_n1 = as.numeric(x$H_n1)
+  R_n1 = as.numeric(x$R_n1) # forecast one step ahead
+  H_n1 = as.numeric(x$H_n1) # forecast one step ahead
 
-  R_forec = H_forec = matrix(NA, nrow=n_ahead, ncol=length(R_n1))
-  colnames(R_forec) = colnames(x$R)
-  colnames(H_forec) = colnames(x$H)
+  R_forec_out = H_forec_out = matrix(0, nrow=n_ahead, ncol=length(R_n1))
+  colnames(R_forec_out) = colnames(x$R)
+  colnames(H_forec_out) = colnames(x$H)
 
-  R_forec[1,] = R_n1
-  H_forec[1,] = H_n1
-  if(n_ahead > 1){
-    for(i in 2:n_ahead){
-      R_forec[i,] = (a+b)*R_forec[i-1,] + (1-a-b)*R
-      H_forec[i,paste0("H_",1:k,",",1:k)] = omega + (alpha+beta)*H_forec[i-1, paste0("H_",1:k,",",1:k)]
+  nSim = nrow(x$MC)
+  ii=1
+  repeat{
+
+    idx = ii
+    if(!bayes){
+      idx = 1:nSim
     }
-  }
 
-  if(k > 1){
-    for(i in 1:(k-1)){
-      for(j in (i+1):k){
-        H_forec[,paste0("H_",i,",",j)] = R_forec[,paste0("R_",i,",",j)]*sqrt(H_forec[,paste0("H_",i,",",i)])*sqrt(H_forec[,paste0("H_",j,",",j)])
-        H_forec[,paste0("H_",j,",",i)] = H_forec[,paste0("H_",i,",",j)]
+    if(k > 1){
+      omega = colMeans( x$MC[idx, 3 + 4*(0:(k-1)), drop=F] )
+      alpha = colMeans( x$MC[idx, 4 + 4*(0:(k-1)), drop=F] )
+      beta =  colMeans( x$MC[idx, 5 + 4*(0:(k-1)), drop=F] )
+      a = mean(x$MC[idx, 'a', drop=F])
+      b = mean(x$MC[idx, 'b', drop=F])
+    }else{
+      omega = mean( x$MC[idx, 3, drop=F] )
+      alpha = mean( x$MC[idx, 4, drop=F] )
+      beta =  mean( x$MC[idx, 5, drop=F] )
+      a = b = 0
+    }
+
+    R_forec = H_forec = matrix(NA, nrow=n_ahead, ncol=length(R_n1))
+    colnames(R_forec) = colnames(x$R)
+    colnames(H_forec) = colnames(x$H)
+
+    R_forec[1,] = R_n1
+    H_forec[1,] = H_n1
+    if(n_ahead > 1){
+      for(i in 2:n_ahead){
+        R_forec[i,] = (a+b)*R_forec[i-1,] + (1-a-b)*R
+        H_forec[i,paste0("H_",1:k,",",1:k)] = omega + (alpha+beta)*H_forec[i-1, paste0("H_",1:k,",",1:k)]
       }
     }
+
+    if(k > 1){
+      for(i in 1:(k-1)){
+        for(j in (i+1):k){
+          H_forec[,paste0("H_",i,",",j)] = R_forec[,paste0("R_",i,",",j)]*sqrt(H_forec[,paste0("H_",i,",",i)])*sqrt(H_forec[,paste0("H_",j,",",j)])
+          H_forec[,paste0("H_",j,",",i)] = H_forec[,paste0("H_",i,",",j)]
+        }
+      }
+    }
+
+    R_forec_out = R_forec_out + R_forec/ifelse(bayes, nSim, 1)
+    H_forec_out = H_forec_out + H_forec/ifelse(bayes, nSim, 1)
+
+    ii = ii+1
+    if( !bayes || ii > nSim ){
+      break
+    }
+
   }
 
-  return( list(H=H_forec, R=R_forec) )
+  return( list(H=H_forec_out, R=R_forec_out) )
 }
 
 
