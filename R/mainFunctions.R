@@ -622,6 +622,10 @@ predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=T){
   colnames(R_forec_out) = colnames(x$R)
   colnames(H_forec_out) = colnames(x$H)
 
+  R_forec = H_forec = matrix(NA, nrow=n_ahead, ncol=length(R_n1))
+  colnames(R_forec) = colnames(x$R)
+  colnames(H_forec) = colnames(x$H)
+
   nSim = nrow(x$MC)
   ii=1
   repeat{
@@ -643,10 +647,6 @@ predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=T){
       beta =  mean( x$MC[idx, 5, drop=F] )
       a = b = 0
     }
-
-    R_forec = H_forec = matrix(NA, nrow=n_ahead, ncol=length(R_n1))
-    colnames(R_forec) = colnames(x$R)
-    colnames(H_forec) = colnames(x$H)
 
     R_forec[1,] = R_n1
     H_forec[1,] = H_n1
