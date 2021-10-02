@@ -606,7 +606,7 @@ update.bayesDccGarch <- function(object,..., mY_new){
 #' out = bayesDccGarch(DaxCacNik)
 #' predict.bayesDccGarch(out, n_ahead=5)
 #' }
-predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=F){
+predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=T){
   x = object
   if(class(x) != "bayesDccGarch"){ stop("Error: argument x is not a element of 'bayesDccGarch' class") }
   mY = x$control$data
@@ -617,10 +617,12 @@ predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=F){
 
   R_n1 = as.numeric(x$R_n1) # forecast one step ahead
   H_n1 = as.numeric(x$H_n1) # forecast one step ahead
+  names(H_n1) = colnames(x$H)
 
   R_forec_out = H_forec_out = matrix(0, nrow=n_ahead, ncol=length(R_n1))
   colnames(R_forec_out) = colnames(x$R)
   colnames(H_forec_out) = colnames(x$H)
+  rownames(R_forec_out) = rownames(H_forec_out) = paste0(1:n_ahead," step ahead")
 
   R_forec = H_forec = matrix(NA, nrow=n_ahead, ncol=length(R_n1))
   colnames(R_forec) = colnames(x$R)
@@ -651,9 +653,12 @@ predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=F){
     R_forec[1,] = R_n1
     H_forec[1,] = H_n1
     if(n_ahead > 1){
-      for(i in 2:n_ahead){
-        R_forec[i,] = (a+b)*R_forec[i-1,] + (1-a-b)*R
-        H_forec[i,paste0("H_",1:k,",",1:k)] = omega + (alpha+beta)*H_forec[i-1, paste0("H_",1:k,",",1:k)]
+      for(i in 1:length(R_n1)){
+        R_forec[,i] = ( (a+b)^(0:(n_ahead-1)) )*( R_n1[i] - R[i] ) + R[i]
+      }
+
+      for(i in 1:k){
+        H_forec[ ,paste0("H_",i,",",i)] = omega[i]*( (alpha[i]+beta[i])^(0:(n_ahead-1)) -1)/(alpha[i]+beta[i]-1)  + ((alpha[i]+beta[i])^(0:(n_ahead-1)))*H_n1[paste0("H_",i,",",i)]
       }
     }
 
