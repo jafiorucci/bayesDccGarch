@@ -16,8 +16,8 @@
 	\tabular{ll}{
 		Package: \tab bayesDccGarch\cr
 		Type: \tab Package\cr
-		Version: \tab 3.0\cr
-		Date: \tab 2021-10-01\cr
+		Version: \tab 3.0.1\cr
+		Date: \tab 2021-10-02\cr
 		License: \tab GPL (>=2.14) \cr
     }
 
