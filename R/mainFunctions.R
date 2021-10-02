@@ -606,7 +606,7 @@ update.bayesDccGarch <- function(object,..., mY_new){
 #' out = bayesDccGarch(DaxCacNik)
 #' predict.bayesDccGarch(out, n_ahead=5)
 #' }
-predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=T){
+predict.bayesDccGarch <- function(object,..., n_ahead=5, bayes=F){
   x = object
   if(class(x) != "bayesDccGarch"){ stop("Error: argument x is not a element of 'bayesDccGarch' class") }
   mY = x$control$data
